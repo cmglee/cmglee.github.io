@@ -3,7 +3,7 @@
  <head>
   <title>Steel-pan Simulator by CMG Lee</title>
   <style type="text/css">
-body { background:#333; }
+body { background:#666; }
 svg  { position:fixed; top:0; left:0; height:100%; width:100% }
   </style>
  </head>
@@ -75,14 +75,15 @@ text        { stroke:none; pointer-events:none; }
    const data_rings = data_ringss[i_ring];
    const n_note     = data_rings['n_note'];
    for (let i_note = 0; i_note < n_note; ++i_note) {
-    const deg   = (360.0 * (i_note * data_rings['step']) /
-                   n_note).toFixed(0) % 360;
-    const label = label_notes[i_note].replace('#', '&#9839;').
-                   replace('b', '&#9837;') + suffix_rings[i_ring];
+    const deg      = (360.0 * (i_note * data_rings['step']) /
+                      n_note).toFixed(0) % 360;
+    const label    = label_notes[i_note].replace('#', '&#9839;').
+                      replace('b', '&#9837;') + suffix_rings[i_ring];
+    const out_play = 'playNotes([${frequency}], [1])';
     // log(i_ring, i_note, deg);
     out_notes.push(`
 <g class="note" transform="rotate(-${deg}) translate(0,${data_rings['r_ring']})"
-                onmousedown="playNotes([${frequency}], [1]);">
+                ontouchstart="${out_play}">
  <ellipse rx="${data_rings['rx_note']}" ry="${data_rings['ry_note']}"/>
  <text transform="rotate(${deg})" y="0.7ex"
        font-size="${data_rings['font']}" fill="#000">${label}</text>
