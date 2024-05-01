@@ -14,28 +14,31 @@ svg  { position:fixed; top:0; left:0; height:100%; width:100% }
      width="100%" height="100%" viewBox="-256 -256 512 512">
  <title>Steel-pan Simulator by CMG Lee</title>
  <style type="text/css">
-svg         { font-family:Helvetica,Arial,sans-serif; font-size:40px;
-              text-anchor:middle; fill:#000; }
-text        { stroke:none; pointer-events:none; }
-.note       { letter-spacing:-2px; fill:url(#grad_note); }
-.note:hover { filter:url(#filter_hover); }
+svg             { font-family:Helvetica,Arial,sans-serif; font-size:40px;
+                  text-anchor:middle; fill:#000; }
+text            { stroke:none; pointer-events:none; }
+text::selection { background:none; }
+.note>text      { letter-spacing:-2px; }
+.note>ellipse   { fill:url(#gradNote); }
+x.note:hover { filter:url(#filterHover); }
  </style>
  <defs>
-  <filter id="filter_hover">
+  <filter id="filterHover">
    <feColorMatrix type="matrix"
                   values="0.5,0,0,0,0 0,0.5,0,0,0 0,0,0.5,0,0 0,0,0,1,0"/>
   </filter>
-  <radialGradient id="grad_note" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+  <radialGradient id="gradNote" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
    <stop offset="50%" stop-color="#fff"/>
-   <stop offset="90%" stop-color="#ccc"/>
+   <stop offset="90%" stop-color="#999"/>
   </radialGradient>
   <circle id="pan" cx="0" cy="0" r="255"/>
  </defs>
- <clipPath id="clip_pan">
+ <clipPath id="clipPan">
   <use xlink:href="#pan"/>
  </clipPath>
- <use xlink:href="#pan" fill="url(#grad_note)"/>
- <g id="notes" clip-path="url(#clip_pan)"></g>
+ <use xlink:href="#pan" fill="url(#gradNote)" stroke="#ccc"/>
+ <g id="notes" clip-path="url(#clipPan)"></g>
+ <text id="debug"></text>
  <script type="text/ecmascript"><![CDATA[ /// so needn't use &lt; for < etc
   function playNotes(frequencys, durations, type='triangle') {
    const audioContext = new AudioContext();
@@ -62,36 +65,44 @@ text        { stroke:none; pointer-events:none; }
    oscillator.start();
    oscillator.stop(now);
   }
-  const data_ringss  = [
-   {'n_note':12,'rx_note':59,'ry_note':70,'r_ring':230,'step':7,'font':40},
-   {'n_note':12,'rx_note':31,'ry_note':40,'r_ring':120,'step':7,'font':35},
-   {'n_note': 5,'rx_note':27,'ry_note':32,'r_ring': 49,'step':3,'font':30},
+  function play(frequency, isOnTouch) {
+   if (isOnTouch) { isTouchDevice = true; }
+   /// Avoid triggering on both onmousedown and ontouchstart
+   if (isOnTouch || !isTouchDevice) { playNotes([frequency], [1]); }
+   // document.getElementById('debug').innerHTML =
+   //  frequency.toFixed(0) + ',' + (new Date()).getTime() % 1e3;
+  }
+  var   isTouchDevice = false;
+  var   frequency     = 440 / Math.pow(2, 0.75); /// concert middle-C
+  const outNotes      = [];
+  const labelNotes    = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+  const labelRings    = ['', '&#8242;', '&#8243;'];
+  const dataRingss    = [
+   {'nNote':12,'rxNote':59,'ryNote':70,'rRing':230,'step':7,'font':40},
+   {'nNote':12,'rxNote':31,'ryNote':40,'rRing':120,'step':7,'font':35},
+   {'nNote': 5,'rxNote':27,'ryNote':32,'rRing': 49,'step':3,'font':30},
   ];
-  const label_notes  = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
-  const suffix_rings = ['', '&#8242;', '&#8243;'];
-  const out_notes    = [];
-  var   frequency    = 440 / Math.pow(2, 0.75); /// concert middle-C
-  for  (let i_ring = 0; i_ring < data_ringss.length; ++i_ring) {
-   const data_rings = data_ringss[i_ring];
-   const n_note     = data_rings['n_note'];
-   for (let i_note = 0; i_note < n_note; ++i_note) {
-    const deg      = (360.0 * (i_note * data_rings['step']) /
-                      n_note).toFixed(0) % 360;
-    const label    = label_notes[i_note].replace('#', '&#9839;').
-                      replace('b', '&#9837;') + suffix_rings[i_ring];
-    const out_play = 'playNotes([${frequency}], [1])';
-    // log(i_ring, i_note, deg);
-    out_notes.push(`
-<g class="note" transform="rotate(-${deg}) translate(0,${data_rings['r_ring']})"
-                ontouchstart="${out_play}">
- <ellipse rx="${data_rings['rx_note']}" ry="${data_rings['ry_note']}"/>
+  for (let iRing = 0; iRing < dataRingss.length; ++iRing) {
+   const dataRings = dataRingss[iRing];
+   const nNote     = dataRings['nNote'];
+   for (let iNote = 0; iNote < nNote; ++iNote) {
+    const deg   = (360.0 * (iNote * dataRings['step']) /
+                   nNote).toFixed(0) % 360;
+    const label = labelNotes[iNote].replace('#', '&#9839;').
+                   replace('b', '&#9837;') + labelRings[iRing];
+    // console.log(iRing, iNote, deg);
+    outNotes.push(`
+<g class="note" transform="rotate(-${deg}) translate(0,${dataRings['rRing']})"
+                ontouchstart="play(${frequency}, true );"
+                onmousedown ="play(${frequency}, false);">
+ <ellipse rx="${dataRings['rxNote']}" ry="${dataRings['ryNote']}"/>
  <text transform="rotate(${deg})" y="0.7ex"
-       font-size="${data_rings['font']}" fill="#000">${label}</text>
+       font-size="${dataRings['font']}">${label}</text>
 </g>`);
     frequency *= Math.pow(2, 1.0 / 12);
    }
   }
-  document.getElementById('notes').innerHTML = out_notes.join();
+  document.getElementById('notes').innerHTML = outNotes.join();
  ]]></script>
 </svg>
 
