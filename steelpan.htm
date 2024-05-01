@@ -3,6 +3,7 @@
  <head>
   <title>Steel-pan Simulator by CMG Lee</title>
   <style type="text/css">
+*    { touch-action:manipulation; }
 body { background:#666; }
 svg  { position:fixed; top:0; left:0; height:100%; width:100% }
   </style>
@@ -14,28 +15,23 @@ svg  { position:fixed; top:0; left:0; height:100%; width:100% }
      width="100%" height="100%" viewBox="-256 -256 512 512">
  <title>Steel-pan Simulator by CMG Lee</title>
  <style type="text/css">
-svg             { font-family:Helvetica,Arial,sans-serif; font-size:40px;
+svg             { font-family:Helvetica,Arial,sans-serif; font-size:36px;
                   text-anchor:middle; fill:#000; }
 text            { stroke:none; pointer-events:none; }
 text::selection { background:none; }
 .note>text      { letter-spacing:-2px; }
 .note>ellipse   { fill:url(#gradNote); }
-x.note:hover { filter:url(#filterHover); }
  </style>
  <defs>
-  <filter id="filterHover">
-   <feColorMatrix type="matrix"
-                  values="0.5,0,0,0,0 0,0.5,0,0,0 0,0,0.5,0,0 0,0,0,1,0"/>
-  </filter>
   <radialGradient id="gradNote" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
    <stop offset="50%" stop-color="#fff"/>
    <stop offset="90%" stop-color="#999"/>
   </radialGradient>
   <circle id="pan" cx="0" cy="0" r="255"/>
+  <clipPath id="clipPan">
+   <use xlink:href="#pan"/>
+  </clipPath>
  </defs>
- <clipPath id="clipPan">
-  <use xlink:href="#pan"/>
- </clipPath>
  <use xlink:href="#pan" fill="url(#gradNote)" stroke="#ccc"/>
  <g id="notes" clip-path="url(#clipPan)"></g>
  <text id="debug"></text>
@@ -78,9 +74,9 @@ x.note:hover { filter:url(#filterHover); }
   const labelNotes    = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
   const labelRings    = ['', '&#8242;', '&#8243;'];
   const dataRingss    = [
-   {'nNote':12,'rxNote':59,'ryNote':70,'rRing':230,'step':7,'font':40},
-   {'nNote':12,'rxNote':31,'ryNote':40,'rRing':120,'step':7,'font':35},
-   {'nNote': 5,'rxNote':27,'ryNote':32,'rRing': 49,'step':3,'font':30},
+   {'nNote':12,'rxNote':59,'ryNote':50,'rRing':230,'step':7},
+   {'nNote':12,'rxNote':36,'ryNote':40,'rRing':140,'step':7},
+   {'nNote': 5,'rxNote':34,'ryNote':40,'rRing': 61,'step':3},
   ];
   for (let iRing = 0; iRing < dataRingss.length; ++iRing) {
    const dataRings = dataRingss[iRing];
@@ -96,8 +92,7 @@ x.note:hover { filter:url(#filterHover); }
                 ontouchstart="play(${frequency}, true );"
                 onmousedown ="play(${frequency}, false);">
  <ellipse rx="${dataRings['rxNote']}" ry="${dataRings['ryNote']}"/>
- <text transform="rotate(${deg})" y="0.7ex"
-       font-size="${dataRings['font']}">${label}</text>
+ <text transform="rotate(${deg})" y="0.7ex">${label}</text>
 </g>`);
     frequency *= Math.pow(2, 1.0 / 12);
    }
