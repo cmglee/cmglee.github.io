@@ -36,11 +36,11 @@ text::selection { background:none; }
  <g id="notes" clip-path="url(#clipPan)"></g>
  <text id="debug"></text>
  <script type="text/ecmascript"><![CDATA[ /// so needn't use &lt; for < etc
+  const audioContext = new AudioContext();
   function playNotes(frequencys, durations, type='triangle') {
-   const audioContext = new AudioContext();
-   const oscillator   = audioContext.createOscillator();
-   const gain         = audioContext.createGain();
-   var   now          = audioContext.currentTime;
+   const oscillator = audioContext.createOscillator();
+   const gain       = audioContext.createGain();
+   var   now        = audioContext.currentTime;
    oscillator.connect(gain).connect(audioContext.destination);
    oscillator.type = type;
    if (frequencys.constructor !== Array) { frequencys = [frequencys]; }
