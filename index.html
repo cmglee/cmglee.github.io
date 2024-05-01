@@ -72,8 +72,8 @@ svg  { position:fixed; top:0; left:0; height:100%; width:100% }
   */
   /// from http://marcgg.com/blog/2016/11/01/javascript-audio
   ///  and http://redblobgames.com/x/1618-webaudio
+  var audioContext = new AudioContext();
   function playNotes(frequencys, durations, type='triangle') {
-   var audioContext = new AudioContext();
    var now          = audioContext.currentTime;
    var gain         = audioContext.createGain();
    var oscillator   = audioContext.createOscillator();
