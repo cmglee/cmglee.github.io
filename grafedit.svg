@@ -3,9 +3,8 @@
  <title>Simple Graph Editor by CMG Lee</title>
  <style type="text/css">
 svg { font-family:'Liberation Sans',Helvetica,Arial,sans-serif; font-size:8px; text-anchor:middle; fill:#000; stroke-width:0.5; }
-.label, .edge     { filter:url(#filter_glow); }
-.label:hover      { stroke:#000; cursor:pointer; }
-.label::selection { background:none; }
+.label, .edge { filter:url(#filter_glow); }
+.label:hover  { stroke:#000; cursor:grab; }
 .edge { fill:none; stroke:currentColor; stroke-width:1; }
 .k { color:#ccc; marker-end:url(#marker_k); }
 .a { color:#096; marker-end:url(#marker_a); }
@@ -24,9 +23,16 @@ svg { font-family:'Liberation Sans',Helvetica,Arial,sans-serif; font-size:8px; t
    <feBlend in="SourceGraphic"/>
   </filter>
  </defs>
- <rect width="100" height="100" fill="#fff" stroke="#eee"/>
+ <circle r="99999" fill="#eee"/>
+ <rect width="100" height="100" fill="#fff"/>
  <g id="gen"></g>
  <script><![CDATA[
+/// USAGE: Edit table below to define graph edges (row to column)
+///            cell values = CSS class as above (blank = no edge)
+///            _label      = value shown on graph
+///            _x, _y      = _label coordinates from 0 to 100
+///        Drag labels around until graph is satisfactory.
+///        Copy updated data from browser Console (F12).
 const data = `
 >|0|1|2|3|4|5|6|7|_label|_x|_y
 0|k|a| | | | | | |  000 |50|15
@@ -38,9 +44,12 @@ const data = `
 6| | | | |v|g| | |  110 |20|75
 7| | | | | | |a|k|  111 |50|95
 `;
-const sweep = 1;
-const title_original = document.title;
-var data_dd = {};
+const arc_sweep       = 1;   /// 0|1: which way arcs bend
+const arc_power       = 0.9; /// controls radii of arcs
+const arc_factor      = 0.1; /// controls radii of arcs
+const arc_radius_same = 5;   /// radii of loop-backs
+const title_original  = document.title;
+var   data_dd         = {};
 parse_data(data);
 
 function parse_data(data) {
@@ -78,14 +87,14 @@ function draw_data() {
 <text id="${key_row}" class="label" x="${x_row}" y="${y_row}" dy="0.6ex">${data_d['_label']}</text>`);
   for (const [key_cell, data_cell] of Object.entries(data_d)) {
    if (key_cell in data_dd && data_cell != '') {
-    var large_arc = 0;
+    var arc_large = 0;
     var x_cell = parseFloat(data_dd[key_cell]['_x']);
     var y_cell = parseFloat(data_dd[key_cell]['_y']);
-    var radius = Math.pow(Math.pow(x_row - x_cell, 2) +
-                          Math.pow(y_row - y_cell, 2), 0.9) * 0.1;
-    if (key_cell == key_row) { x_cell += 0.01; radius = 5; large_arc = 1; }
+    var arc_radius = Math.pow(Math.pow(x_row - x_cell, 2) +
+                              Math.pow(y_row - y_cell, 2), arc_power) * arc_factor;
+    if (key_cell == key_row) { x_cell += 0.01; arc_radius = arc_radius_same; arc_large = 1; }
     out_edge_a.push(`
-<path class="edge ${data_cell}" d="M ${x_row},${y_row} A ${radius},${radius} 0 ${large_arc} ${sweep} ${x_cell},${y_cell}"/>`);
+<path class="edge ${data_cell}" d="M ${x_row},${y_row} A ${arc_radius},${arc_radius} 0 ${arc_large} ${arc_sweep} ${x_cell},${y_cell}"/>`);
 // <path class="edge ${data_cell}" d="M ${x_row},${y_row} L ${(x_row + x_cell) / 2},${(y_row + y_cell) / 2} L ${x_cell},${y_cell}"/>`);
    }
   }
