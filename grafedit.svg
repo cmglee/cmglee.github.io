@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" onmousemove="callback(evt, 0);" onmousedown="callback(evt, 1);" onmouseup="callback(evt, 2);" onmouseleave="callback(evt, 3);">
+ <title>Simple Graph Editor by CMG Lee</title>
+ <style type="text/css">
+svg { font-family:'Liberation Sans',Helvetica,Arial,sans-serif; font-size:8px; text-anchor:middle; fill:#000; stroke-width:0.5; }
+.label, .edge     { filter:url(#filter_glow); }
+.label:hover      { stroke:#000; cursor:pointer; }
+.label::selection { background:none; }
+.edge { fill:none; stroke:currentColor; stroke-width:1; }
+.k { color:#ccc; marker-end:url(#marker_k); }
+.a { color:#096; marker-end:url(#marker_a); }
+.v { color:#f90; marker-end:url(#marker_v); }
+.g { color:#09f; marker-end:url(#marker_g); }
+ </style>
+ <defs>
+  <marker id="marker_k" refX="4" refY="1.5" orient="auto"><use class="k" xlink:href="#_"/></marker>
+  <marker id="marker_a" refX="4" refY="1.5" orient="auto"><use class="a" xlink:href="#_"/></marker>
+  <marker id="marker_v" refX="4" refY="1.5" orient="auto"><use class="v" xlink:href="#_"/></marker>
+  <marker id="marker_g" refX="4" refY="1.5" orient="auto"><use class="g" xlink:href="#_"/></marker>
+  <path id="_" d="M 0,0 L 2,1.5 L 0,3" fill="currentColor"/>
+  <filter id="filter_glow" x="-50%" y="-50%" width="200%" height="200%">
+   <feMorphology operator="dilate" radius="0.5"/>
+   <feColorMatrix type="matrix" values="0,0,0,0,1 0,0,0,0,1 0,0,0,0,1 0,0,0,0.8,0"/>
+   <feBlend in="SourceGraphic"/>
+  </filter>
+ </defs>
+ <rect width="100" height="100" fill="#fff" stroke="#eee"/>
+ <g id="gen"></g>
+ <script><![CDATA[
+const data = `
+>|0|1|2|3|4|5|6|7|_label|_x|_y
+0|k|a| | | | | | |  000 |50|15
+1| | |v|g| | | | |  001 |80|35
+2| | | | |g|v| | |  010 |50|45
+3| | | | | | |k|a|  011 |80|75
+4|a|k| | | | | | |  100 |20|35
+5| | |g|v| | | | |  101 |50|65
+6| | | | |v|g| | |  110 |20|75
+7| | | | | | |a|k|  111 |50|95
+`;
+const sweep = 1;
+const title_original = document.title;
+var data_dd = {};
+parse_data(data);
+
+function parse_data(data) {
+ /// Make nested arrays
+ const data_aa = [];
+ for (const [i_row, data_row] of data.trim().split('\n').entries()) {
+  const data_a = [];
+  for (const [i_cell, data_cell] of data_row.split('|').entries()) {
+   data_a.push(data_cell.trim());
+  }
+  data_aa.push(data_a);
+ }
+ // console.log(data_aa);
+ /// Make nested dictionaries
+ data_dd = {};
+ for (const [i_row, data_a] of data_aa.entries()) {
+  if (i_row > 0) {
+   const data_d = {};
+   for (const [i_cell, data_cell] of data_a.entries()) {
+    if (i_cell > 0) { data_d[data_aa[0][i_cell]] = data_cell; }
+   }
+   data_dd[data_a[0]] = data_d;
+  }
+ }
+ draw_data();
+}
+
+function draw_data() {
+ const out_edge_a  = [];
+ const out_label_a = [];
+ for (const [key_row, data_d] of Object.entries(data_dd)) {
+  const x_row = parseFloat(data_d['_x']);
+  const y_row = parseFloat(data_d['_y']);
+  out_label_a.push(`
+<text id="${key_row}" class="label" x="${x_row}" y="${y_row}" dy="0.6ex">${data_d['_label']}</text>`);
+  for (const [key_cell, data_cell] of Object.entries(data_d)) {
+   if (key_cell in data_dd && data_cell != '') {
+    var large_arc = 0;
+    var x_cell = parseFloat(data_dd[key_cell]['_x']);
+    var y_cell = parseFloat(data_dd[key_cell]['_y']);
+    var radius = Math.pow(Math.pow(x_row - x_cell, 2) +
+                          Math.pow(y_row - y_cell, 2), 0.9) * 0.1;
+    if (key_cell == key_row) { x_cell += 0.01; radius = 5; large_arc = 1; }
+    out_edge_a.push(`
+<path class="edge ${data_cell}" d="M ${x_row},${y_row} A ${radius},${radius} 0 ${large_arc} ${sweep} ${x_cell},${y_cell}"/>`);
+// <path class="edge ${data_cell}" d="M ${x_row},${y_row} L ${(x_row + x_cell) / 2},${(y_row + y_cell) / 2} L ${x_cell},${y_cell}"/>`);
+   }
+  }
+ }
+ document.getElementById('gen').innerHTML = out_edge_a.join() + out_label_a.join();
+}
+
+function update_data(target) {
+ data_dd[target.id]['_x'] = target.getAttributeNS(null, 'x');
+ data_dd[target.id]['_y'] = target.getAttributeNS(null, 'y');
+ draw_data();
+}
+
+function log_data(target) {
+ /// Make nested arrays
+ const data_aa  = [];
+ const header_a = ['>'];
+ for (const [key_row, data_d] of Object.entries(data_dd)) {
+  const data_a = [key_row];
+  for (const [key_cell, data_cell] of Object.entries(data_d)) {
+   if (data_aa.length == 0) { header_a.push(key_cell); }
+   data_a.push(data_cell);
+  }
+  if (data_aa.length == 0) { data_aa.push(header_a); }
+  data_aa.push(data_a);
+ }
+ /// Compute column widths
+ const width_a = [];
+ for (const [i_row, data_a] of data_aa.entries()) {
+  for (const [i_cell, data_cell] of data_a.entries()) {
+   if (width_a.length <= i_cell) { width_a.push(0); }
+   if (width_a[i_cell] < data_cell.length) {
+    width_a[i_cell] = data_cell.length;
+   }
+  }
+ }
+ /// Output table
+ const out_aa = [];
+ for (const [i_row, data_a] of data_aa.entries()) {
+  const out_a = [];
+  for (const [i_cell, data_cell] of data_a.entries()) {
+   out_a.push(data_cell.padStart(width_a[i_cell]));
+  }
+  out_aa.push(out_a.join('|'));
+ }
+ console.log(out_aa.join('\n'));
+}
+
+const svg = document.getElementsByTagName('svg')[0];
+function get_coords(evt) {
+ const ctm = svg.getScreenCTM();
+ return [parseInt((evt.clientX - ctm.e) / ctm.a),
+         parseInt((evt.clientY - ctm.f) / ctm.d)];
+}
+var target = null;
+function callback(evt, action) { /// 0=move, 1=down, 2=up, 3=leave
+ evt.preventDefault();
+ const coords = get_coords(evt);
+ if (action == 1) {
+  target = evt.target;
+ } else if (action == 0 && target) {
+  target.setAttributeNS(null, 'x', coords[0]);
+  target.setAttributeNS(null, 'y', coords[1]);
+  update_data(target);
+ } else if (target) {
+  // update_data(target);
+  log_data(data_dd);
+  target = null;
+ }
+ document.title = target ? target.textContent + ' (' + target.id + ') @ ' + coords : title_original;
+}
+]]></script>
+</svg>
