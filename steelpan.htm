@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
  <head>
-  <title>Steel-pan Simulator by CMG Lee</title>
+  <title>CUSPS steel-pan simulator by CMG Lee</title>
   <style type="text/css">
 *    { touch-action:manipulation; }
 body { background:#666; }
@@ -12,92 +12,210 @@ svg  { position:fixed; top:0; left:0; height:100%; width:100% }
 
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
              xmlns:xlink="http://www.w3.org/1999/xlink"
-     width="100%" height="100%" viewBox="-256 -256 512 512">
+     width="100%" height="100%" viewBox="-176 -99 352 198">
  <title>Steel-pan Simulator by CMG Lee</title>
  <style type="text/css">
-svg             { font-family:Helvetica,Arial,sans-serif; font-size:36px;
-                  text-anchor:middle; fill:#000; }
+svg             { font-family:Helvetica,Arial,sans-serif;
+                  font-size:18px; text-anchor:middle; }
 text            { stroke:none; pointer-events:none; }
 text::selection { background:none; }
-.note>text      { letter-spacing:-2px; }
-.note>ellipse   { fill:url(#gradNote); }
+.note>text      { letter-spacing:-1px; }
+.note>ellipse   { fill:url(#grad); }
+.switch         { font-weight:bold; font-size:75%; text-transform:capitalize; }
  </style>
  <defs>
-  <radialGradient id="gradNote" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+  <radialGradient id="grad" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
    <stop offset="50%" stop-color="#fff"/>
-   <stop offset="90%" stop-color="#999"/>
+   <stop offset="90%" stop-color="#ccc"/>
   </radialGradient>
-  <circle id="pan" cx="0" cy="0" r="255"/>
-  <clipPath id="clipPan">
-   <use xlink:href="#pan"/>
-  </clipPath>
+  <rect id="button" x="-28" y="-6" width="56" height="12" rx="6" ry="6"/>
+  <g id="rotate">
+   <circle r="9" fill="#999"/>
+   <text y="0.6ex">&#10551;</text>
+  </g>
  </defs>
- <use xlink:href="#pan" fill="url(#gradNote)" stroke="#ccc"/>
- <g id="notes" clip-path="url(#clipPan)"></g>
+ <g id="main" transform="rotate(0)"></g>
  <text id="debug"></text>
  <script type="text/ecmascript"><![CDATA[ /// so needn't use &lt; for < etc
   const audioContext = new AudioContext();
-  function playNotes(frequencys, durations, type='triangle') {
+  function playNotes(hertzs, durations, type='triangle') {
    const oscillator = audioContext.createOscillator();
    const gain       = audioContext.createGain();
    var   now        = audioContext.currentTime;
    oscillator.connect(gain).connect(audioContext.destination);
    oscillator.type = type;
-   if (frequencys.constructor !== Array) { frequencys = [frequencys]; }
+   if (hertzs.constructor !== Array) { hertzs = [hertzs]; }
    if (durations .constructor !== Array) { durations  = [durations ]; }
    var duration;
-   for (var i = 0; i < frequencys.length; ++i) {
-    var frequency = frequencys[i];
+   for (var i = 0; i < hertzs.length; ++i) {
+    var hertz = hertzs[i];
     if (i < durations.length) { duration = durations[i]; }
     if (duration > 0) { /// avoid click if last note is not played
      gain.gain.exponentialRampToValueAtTime(
-      Math.min(1, Math.sqrt(110 / frequency)) *
+      Math.min(1, Math.sqrt(110 / hertz)) *
       (type == 'sawtooth' ? 0.25 : type == 'square' ? 0.5 : 1), now);
      gain.gain.exponentialRampToValueAtTime(1e-3, now + duration - 1e-3);
     }
-    oscillator.frequency.exponentialRampToValueAtTime(frequency, now);
+    oscillator.frequency.exponentialRampToValueAtTime(hertz, now);
     now += duration;
    }
    oscillator.start();
    oscillator.stop(now);
   }
-  function play(frequency, isOnTouch) {
+  var isTouchDevice = false;
+  function play(hertz, isOnTouch) {
    if (isOnTouch) { isTouchDevice = true; }
    /// Avoid triggering on both onmousedown and ontouchstart
-   if (isOnTouch || !isTouchDevice) { playNotes([frequency], [1]); }
+   if (isOnTouch || !isTouchDevice) { playNotes([hertz], [1]); }
    // document.getElementById('debug').innerHTML =
-   //  frequency.toFixed(0) + ',' + (new Date()).getTime() % 1e3;
+   //  hertz.toFixed(0) + ',' + (new Date()).getTime() % 1e3;
   }
-  var   isTouchDevice = false;
-  var   frequency     = 440 / Math.pow(2, 0.75); /// concert middle-C
-  const outNotes      = [];
-  const labelNotes    = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
-  const labelRings    = ['', '&#8242;', '&#8243;'];
-  const dataRingss    = [
-   {'nNote':12,'rxNote':59,'ryNote':50,'rRing':230,'step':7},
-   {'nNote':12,'rxNote':36,'ryNote':40,'rRing':140,'step':7},
-   {'nNote': 5,'rxNote':34,'ryNote':40,'rRing': 61,'step':3},
-  ];
-  for (let iRing = 0; iRing < dataRingss.length; ++iRing) {
-   const dataRings = dataRingss[iRing];
-   const nNote     = dataRings['nNote'];
-   for (let iNote = 0; iNote < nNote; ++iNote) {
-    const deg   = (360.0 * (iNote * dataRings['step']) /
-                   nNote).toFixed(0) % 360;
-    const label = labelNotes[iNote].replace('#', '&#9839;').
-                   replace('b', '&#9837;') + labelRings[iRing];
-    // console.log(iRing, iNote, deg);
-    outNotes.push(`
-<g class="note" transform="rotate(-${deg}) translate(0,${dataRings['rRing']})"
-                ontouchstart="play(${frequency}, true );"
-                onmousedown ="play(${frequency}, false);">
- <ellipse rx="${dataRings['rxNote']}" ry="${dataRings['ryNote']}"/>
- <text transform="rotate(${deg})" y="0.7ex">${label}</text>
-</g>`);
-    frequency *= Math.pow(2, 1.0 / 12);
+  function makeTenor() {
+   return makePans([{'xy':'0,0','notes':[
+     ['C4','G4','D4','A4','E4','B4','F#4','C#4','Ab4','Eb4','Bb4','F4'],
+     ['C5','G5','D5','A5','E5','B5','F#5','C#5','Ab5','Eb5','Bb5','F5'],
+     ['C6',     'D6',     'E6',           'C#6',      'Eb6'           ],
+     [null]]}], [
+    {'rx':23,'ry':15,'r':84},
+    {'rx':14,'ry':15,'r':54},
+    {'rx':14,'ry':15,'r':24},
+    {'rx':99,'ry':99,'r': 0},
+   ], 4);
+  }
+  function makeSecond() {
+   return makePans([
+    {'xy':'-88,0','notes':[['F#3','Bb3','F#4','C4','Ab4','E4' ,'Ab3','D4' ],
+                           ['Bb4','F#5','C5','Ab5','E5' ,'D5'],['Bb5'],[null]]},
+    {'xy':' 88,0','notes':[['F3' ,'A3' ,'F4','B3' ,'G4' ,'Eb4','G3' ,'C#4'],
+                           ['A4' ,'F5' ,'B4','G5' ,'Eb5','C#5'],['A5'],[null]]},
+   ], [
+    {'rx':28,'ry':18,'r':70},
+    {'rx':18,'ry':18,'r':36},
+    {'rx':18,'ry':18,'r': 0},
+    {'rx':88,'ry':88,'r': 0},
+   ], 3);
+  }
+  function makeGuitar() {
+   return makePans([
+    {'xy':'-88,0','notes':[['D3' ,'Ab3','D4' ,'B3' ,'F3' ,'C#4','A3'],
+                           ['F4'],[null]]},
+    {'xy':' 88,0','notes':[['Eb3','F#3','Eb4','Bb3','E3' ,'C4' ,'G3'],
+                           ['E4'],[null]]},
+   ], [
+    {'rx':25,'ry':30,'r':58},
+    {'rx':28,'ry':28,'r': 0},
+    {'rx':88,'ry':88,'r': 0},
+   ], 3);
+  }
+  function makeBass() {
+   return makePans([
+    {'xy':' -52,-45','notes':[['Ab2','Ab3','C3' ,'E3' ],['C4' ],[null]]},
+    {'xy':'  52,-45','notes':[['G2' ,'G3' ,'B2' ,'Eb3'],['B3' ],[null]]},
+    {'xy':'-122, 32','notes':[['F#2','F#3','Bb2','D3' ],['Bb3'],[null]]},
+    {'xy':' 122, 32','notes':[['F2' ,'F3' ,'A2' ,'C#3'],['A3' ],[null]]},
+   ], [
+    {'rx':29,'ry':18,'r':34},
+    {'rx':16,'ry':16,'r': 0},
+    {'rx':52,'ry':52,'r': 0},
+   ], 2);
+  }
+  function makePans(panss, ringss, octaveMin) {
+   const outs = [];
+   for (let iPan = 0; iPan < panss.length; ++iPan) {
+    const pans   = panss[iPan];
+    const notess = pans['notes'];
+    for (let iRing = notess.length - 1; iRing >= 0; --iRing) {
+     const notes = notess[iRing];
+     for (let iNote = 0; iNote < notes.length; ++iNote) {
+      outs.push(makeNote(notes[iNote], octaveMin, pans['xy'],
+                ringss[iRing]['rx'], ringss[iRing]['ry'],
+                ringss[iRing]['r'], 360.0 * iNote / notes.length));
+     }
+    }
+   }
+   return outs.join();
+  }
+  function makeNote(note, octaveMin, xyPan, rxNote, ryNote, rRing, deg) {
+   if (note === null) {
+    return `
+<g class="note" transform="translate(${xyPan}) rotate(${-deg})
+                           translate(0,${rRing})">
+ <ellipse rx="${rxNote}" ry="${ryNote}"/>
+</g>`
+   } else {
+    const hertz = Math.pow(2, tones.indexOf(note.slice(0, -1)) / 12.0 +
+                              parseInt(note.slice(-1)) - 4) * hertzC4;
+    const label = note.slice(0, -1).replace('#', '&#9839;').
+                                    replace('b', '&#9837;') +
+                  octaves[parseInt(note.slice(-1)) - octaveMin];
+    return `
+<g class="note" transform="translate(${xyPan}) rotate(${-deg})
+                           translate(0,${rRing})"
+                ontouchstart="play(${hertz}, true );"
+                onmousedown ="play(${hertz}, false);">
+ <ellipse rx="${rxNote}" ry="${ryNote}"/>
+ <text transform="rotate(${deg})" x="-1" y="0.7ex">${label}</text>
+</g>`
    }
   }
-  document.getElementById('notes').innerHTML = outNotes.join();
+  function switchPans(idShow) {
+   for (let iPan = 0; iPan < datass.length; ++iPan) {
+    const id = datass[iPan]['id'];
+    document.getElementById(id).style.visibility = idShow == id ?
+                                                   'visible' : 'hidden';
+    document.getElementById('button_' + id).style.fill = idShow == id ?
+                                                         'url(#grad)' : '#999';
+   }
+  }
+  function rotate(isClockwise) {
+   const elSvg    = document.getElementsByTagName('svg')[0];
+   const elMain   = document.getElementById('main');
+   const viewBoxs = elSvg.getAttribute('viewBox').split(/\s+/);
+   const deg = parseInt(elMain.getAttribute('transform').match(/[-\d]+/)[0]);
+   // console.log(viewBoxs, deg);
+   elSvg.setAttribute('viewBox', [viewBoxs[1], viewBoxs[0],
+                                  viewBoxs[3], viewBoxs[2]].join(' '));
+   elMain.setAttribute('transform', 'rotate(' + (deg + (isClockwise ?
+                                                        90 : -90)) + ')');
+  }
+  const outss   = [`
+ <g onmousedown="rotate(false)">
+  <use xlink:href="#rotate" transform="translate(-146, 0)"/>
+  <use xlink:href="#rotate" transform="translate(   0,88)"/>
+ </g>
+ <g onmousedown="rotate(true)">
+  <use xlink:href="#rotate" transform="translate(147,  0) scale(-1,1)"/>
+  <use xlink:href="#rotate" transform="translate(  0,-88) scale(1,-1)"/>
+ </g>`];
+  const datass  = [{'id':'tenor' ,'function':makeTenor ,'xy':'-146,-91'},
+                   {'id':'second','function':makeSecond,'xy':'-146, 91'},
+                   {'id':'guitar','function':makeGuitar,'xy':' 146, 91'},
+                   {'id':'bass'  ,'function':makeBass  ,'xy':' 146,-91'}];
+  const tones   = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+  const octaves = ['', '&#8242;', '&#8243;'];
+  const hertzC4 = 440 / Math.pow(2, 0.75); /// concert middle-C
+  for (let iPan = 0; iPan < datass.length; ++iPan) {
+   const datas = datass[iPan];
+   const id    = datas['id'];
+   outss.push(`
+ <g id="${id}"></g>
+ <g transform="translate(${datas['xy']})">
+  <use id="button_${id}" xlink:href="#button"
+       ontouchstart="switchPans('${id}');"
+       onmousedown ="switchPans('${id}');"/>
+  <text class="switch" y="0.7ex">${id}</text>
+ </g>`);
+  }
+  document.getElementById('main').innerHTML = outss.join();
+  for (let iData = 0; iData < datass.length; ++iData) {
+   const datas = datass[iData];
+   document.getElementById(datas['id']).innerHTML = datas['function']();
+  }
+  switchPans('tenor');
+  // switchPans('second');
+  // switchPans('guitar');
+  // switchPans('bass');
+  if (window.innerWidth < window.innerHeight) { rotate(true); }
  ]]></script>
 </svg>
 
