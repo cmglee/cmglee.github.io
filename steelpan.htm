@@ -3,8 +3,7 @@
  <head>
   <title>CUSPS steel-pan simulator by CMG Lee</title>
   <style type="text/css">
-*    { touch-action:pinch-zoom; }
-body { background:#567; }
+body { background:#566; }
 svg  { position:fixed; top:0; left:0; height:100%; width:100% }
   </style>
  </head>
@@ -14,6 +13,7 @@ svg  { position:fixed; top:0; left:0; height:100%; width:100% }
              xmlns:xlink="http://www.w3.org/1999/xlink"
      width="100%" height="100%" viewBox="-176 -99 352 198">
  <style type="text/css">
+*               { touch-action:pinch-zoom; }
 svg             { font-family:Georgia,Cambria,serif;
                   font-size:16px; text-anchor:middle; stroke-width:0.2; }
 text            { stroke:none; pointer-events:none; }
@@ -38,7 +38,7 @@ text::selection { background:none; }
   <rect id="button" class="button"
         x="-28" y="-6" width="56" height="12" rx="6" ry="6"/>
   <g id="rotate" class="button">
-   <circle r="9" fill="#699"/>
+   <circle r="9" fill="#899"/>
    <text y="0.7ex">&#10551;</text>
   </g>
  </defs>
@@ -240,7 +240,7 @@ text::selection { background:none; }
     document.getElementById(id).style.visibility =
      idShow == id ? 'visible' : 'hidden';
     document.getElementById('button_' + id).style.fill =
-     idShow == id ? 'url(#grad_active)' : '#699';
+     idShow == id ? 'url(#grad_active)' : '#899';
    }
   }
   function rotate(isClockwise) {
