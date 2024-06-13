@@ -3,8 +3,8 @@
  <head>
   <title>CUSPS steel-pan simulator by CMG Lee</title>
   <style type="text/css">
-*    { touch-action:manipulation; }
-body { background:#666; }
+*    { touch-action:pinch-zoom; }
+body { background:#567; }
 svg  { position:fixed; top:0; left:0; height:100%; width:100% }
   </style>
  </head>
@@ -13,7 +13,6 @@ svg  { position:fixed; top:0; left:0; height:100%; width:100% }
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
              xmlns:xlink="http://www.w3.org/1999/xlink"
      width="100%" height="100%" viewBox="-176 -99 352 198">
- <title>Steel-pan Simulator by CMG Lee</title>
  <style type="text/css">
 svg             { font-family:Georgia,Cambria,serif;
                   font-size:16px; text-anchor:middle; stroke-width:0.2; }
@@ -39,14 +38,15 @@ text::selection { background:none; }
   <rect id="button" class="button"
         x="-28" y="-6" width="56" height="12" rx="6" ry="6"/>
   <g id="rotate" class="button">
-   <circle r="9" fill="#996"/>
+   <circle r="9" fill="#699"/>
    <text y="0.7ex">&#10551;</text>
   </g>
  </defs>
  <g id="main" transform="rotate(0)"></g>
  <text id="debug"></text>
  <script type="text/ecmascript"><![CDATA[ /// so needn't use &lt; for < etc
-  const log          = console.log;
+  const log = console.log;
+  /// PLAY SOUND
   const audioContext = new AudioContext();
   function playNotes(frequencys, durations, type='triangle') {
    const oscillator = audioContext.createOscillator();
@@ -85,7 +85,7 @@ text::selection { background:none; }
    // document.getElementById('debug').innerHTML =
    //  hertz.toFixed(0) + ',' + (new Date()).getTime() % 1e3;
   }
-
+  /// MAKE INSTRUMENTS
   function noteToHertz(note) {
    return Math.pow(2, tones.indexOf(note.slice(0, -1)) / 12.0 +
                       parseInt(note.slice(-1)) - 4) * hertzC4;
@@ -233,14 +233,14 @@ text::selection { background:none; }
    }
    return '<g font-size="12">\n' + outs.join('') + '\n</g>';
   }
-
+  /// RESPOND TO BUTTONS
   function switchInst(idShow) {
    for (let iInst = 0; iInst < instss.length; ++iInst) {
     const id = instss[iInst]['id'];
     document.getElementById(id).style.visibility =
      idShow == id ? 'visible' : 'hidden';
     document.getElementById('button_' + id).style.fill =
-     idShow == id ? 'url(#grad_active)' : '#996';
+     idShow == id ? 'url(#grad_active)' : '#699';
    }
   }
   function rotate(isClockwise) {
@@ -254,7 +254,7 @@ text::selection { background:none; }
    elMain.setAttribute('transform', 'rotate(' + (deg + (isClockwise ?
                                                         90 : -90)) + ')');
   }
-  ///
+  /// INITIALISE
   const outss = [`
  <a xlink:href="http://github.com/cmglee" target="github">
   <circle cy="-91" r="20" opacity="0"/>
@@ -263,7 +263,7 @@ text::selection { background:none; }
  </a>
  <use xlink:href="#rotate" transform="translate(-10,88)"
                            onmousedown="rotate(false)"/>
- <use xlink:href="#rotate" transform="translate( 10,88) scale(-1,1)"/>
+ <use xlink:href="#rotate" transform="translate( 10,88) scale(-1,1)"
                            onmousedown="rotate(true)"/>`];
   const instss  = [{'id':'tenor'  ,'function':makeTenor  ,'xy':'-146, 92'},
                    {'id':'second' ,'function':makeSecond ,'xy':' -86, 92'},
