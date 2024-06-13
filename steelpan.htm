@@ -15,10 +15,11 @@ svg  { position:fixed; top:0; left:0; height:100%; width:100% }
      width="100%" height="100%" viewBox="-176 -99 352 198">
  <title>Steel-pan Simulator by CMG Lee</title>
  <style type="text/css">
-svg             { font-family:Garamond,Cambria,serif;
-                  font-size:16px; text-anchor:middle; }
+svg             { font-family:Georgia,Cambria,serif;
+                  font-size:16px; text-anchor:middle; stroke-width:0.2; }
 text            { stroke:none; pointer-events:none; }
 text::selection { background:none; }
+.note, .button  { cursor:pointer; }
 .note>text      { letter-spacing:-1px; }
 .note>ellipse   { fill:url(#grad_note); }
 .switch         { font-weight:bold; font-size:75%; text-transform:capitalize; }
@@ -31,14 +32,15 @@ text::selection { background:none; }
    <stop offset="50%" stop-color="#fff"/>
    <stop offset="90%" stop-color="#ccc"/>
   </radialGradient>
-  <radialGradient id="grad_button" cx="50%" cy="50%" r="75%" fx="50%" fy="50%">
+  <radialGradient id="grad_active" cx="50%" cy="50%" r="75%" fx="50%" fy="50%">
    <stop offset="50%" stop-color="#ff6"/>
    <stop offset="90%" stop-color="#f90"/>
   </radialGradient>
-  <rect id="button" x="-28" y="-6" width="56" height="12" rx="6" ry="6"/>
-  <g id="rotate">
+  <rect id="button" class="button"
+        x="-28" y="-6" width="56" height="12" rx="6" ry="6"/>
+  <g id="rotate" class="button">
    <circle r="9" fill="#996"/>
-   <text y="0.9ex">&#10551;</text>
+   <text y="0.7ex">&#10551;</text>
   </g>
  </defs>
  <g id="main" transform="rotate(0)"></g>
@@ -71,7 +73,10 @@ text::selection { background:none; }
    oscillator.stop(now);
   }
   var isTouchDevice = false;
-  function play(hertz, isOnTouch) {
+  function play(hertz, isOnTouch, self_) {
+   self_.event.target.style.stroke = '#000';
+   (function(el) { setTimeout(function() { el.style.stroke = "none"; }, 1e2); })
+    (self_.event.target); /// closure as self_ lost when timeout runs
    if (isOnTouch) { isTouchDevice = true; }
    /// Avoid triggering on both onmousedown and ontouchstart
    if (isOnTouch || !isTouchDevice) {
@@ -92,8 +97,8 @@ text::selection { background:none; }
   function makePianoNote(note, octaveMin, xNote, yNote, wNote, hNote, clas) {
    const hertz      = note === null ?  0 : noteToHertz(note);
    const outCommand = note === null ? '' : `
-                ontouchstart="play(${hertz}, true );"
-                onmousedown ="play(${hertz}, false);"`;
+                ontouchstart="play(${hertz}, true , self);"
+                onmousedown ="play(${hertz}, false, self);"`;
    const outLabel   = note === null ? '' : `
  <text x="-1" y="0.7ex">${noteToLabel(note, octaveMin)}</text>`;
    return `
@@ -105,8 +110,8 @@ text::selection { background:none; }
   function makePanNote(note, octaveMin, xyPan, rxNote, ryNote, rRing, deg) {
    const hertz      = note === null ?  0 : noteToHertz(note);
    const outCommand = note === null ? '' : `
-                ontouchstart="play(${hertz}, true );"
-                onmousedown ="play(${hertz}, false);"`;
+                ontouchstart="play(${hertz}, true , self);"
+                onmousedown ="play(${hertz}, false, self);"`;
    const outLabel   = note === null ? '' : `
  <text transform="rotate(${deg})" x="-1" y="0.7ex">${noteToLabel(note,
                                                       octaveMin)}</text>`;
@@ -138,9 +143,9 @@ text::selection { background:none; }
      ['C5','G5','D5','A5','E5','B5','F#5','C#5','Ab5','Eb5','Bb5','F5'],
      ['C6',     'D6',     'E6',           'C#6',      'Eb6'           ],
      [null]]}], [
-    {'rx':23,'ry':15,'r':84},
+    {'rx':22,'ry':15,'r':84},
     {'rx':14,'ry':15,'r':54},
-    {'rx':14,'ry':15,'r':24},
+    {'rx':13,'ry':15,'r':24},
     {'rx':99,'ry':99,'r': 0},
    ], 4) + `
   <use xlink:href="#rotate" transform="translate(-88,-88)"
@@ -158,7 +163,7 @@ text::selection { background:none; }
               ['A4' ,'F5' ,'B4','G5' ,'Eb5','C#5'], ['A5' ], [null]]},
    ], [
     {'rx':28,'ry':18,'r':70},
-    {'rx':18,'ry':18,'r':36},
+    {'rx':18,'ry':18,'r':35},
     {'rx':18,'ry':18,'r': 0},
     {'rx':88,'ry':88,'r': 0},
    ], 3);
@@ -170,17 +175,17 @@ text::selection { background:none; }
     {'xy'   :' 88,-4',
      'notes':[['Eb3','F#3','Eb4','Bb3','E3' ,'C4' ,'G3' ], ['E4' ], [null]]},
    ], [
-    {'rx':25,'ry':30,'r':58},
+    {'rx':24,'ry':30,'r':58},
     {'rx':28,'ry':28,'r': 0},
     {'rx':88,'ry':88,'r': 0},
    ], 3);
   }
   function makeBass() {
    return makePan([
-    {'xy':' -52,-45','notes':[['Ab2','Ab3','C3' ,'E3' ],['C4' ],[null]]},
-    {'xy':'  52,-45','notes':[['G2' ,'G3' ,'B2' ,'Eb3'],['B3' ],[null]]},
-    {'xy':'-122, 32','notes':[['F#2','F#3','Bb2','D3' ],['Bb3'],[null]]},
-    {'xy':' 122, 32','notes':[['F2' ,'F3' ,'A2' ,'C#3'],['A3' ],[null]]},
+    {'xy':' -52.2,-45','notes':[['Ab2','Ab3','C3' ,'E3' ],['C4' ],[null]]},
+    {'xy':'  52.2,-45','notes':[['G2' ,'G3' ,'B2' ,'Eb3'],['B3' ],[null]]},
+    {'xy':'-122.5, 32','notes':[['F#2','F#3','Bb2','D3' ],['Bb3'],[null]]},
+    {'xy':' 122.5, 32','notes':[['F2' ,'F3' ,'A2' ,'C#3'],['A3' ],[null]]},
    ], [
     {'rx':29,'ry':18,'r':34},
     {'rx':16,'ry':16,'r': 0},
@@ -207,7 +212,7 @@ text::selection { background:none; }
   function makePiano() {
    const outs   = [];
    const wNote  = 22;
-   const hNote  = 80;
+   const hNote  = 77;
    const notess = [
    ['C2','D2','E2','F2','G2','A2','B2','C3','D3','E3','F3','G3','A3','B3','C4'],
    ['C#2','Eb2','','F#2','Ab2','Bb2','','C#3','Eb3','','F#3','Ab3','Bb3'],
@@ -221,12 +226,12 @@ text::selection { background:none; }
       const isWhite = iRow % 2 == 0;
       outs.push(makePianoNote(notes[iNote], 2,
        (iNote - (notess[0].length - (isWhite ? 1 : 2)) / 2.0) * (wNote + 1),
-       (1 - iRow / 2.0) * (hNote + 1) - 15,
+       (1 - iRow / 2.0) * (hNote + 4) - 15,
        wNote, isWhite ? hNote : hNote / 2, isWhite ? 'white' : 'black'));
      }
     }
    }
-   return outs.join('');
+   return '<g font-size="12">\n' + outs.join('') + '\n</g>';
   }
 
   function switchInst(idShow) {
@@ -235,7 +240,7 @@ text::selection { background:none; }
     document.getElementById(id).style.visibility =
      idShow == id ? 'visible' : 'hidden';
     document.getElementById('button_' + id).style.fill =
-     idShow == id ? 'url(#grad_button)' : '#996';
+     idShow == id ? 'url(#grad_active)' : '#996';
    }
   }
   function rotate(isClockwise) {
@@ -251,6 +256,11 @@ text::selection { background:none; }
   }
   ///
   const outss = [`
+ <a xlink:href="http://github.com/cmglee" target="github">
+  <circle cy="-91" r="20" opacity="0"/>
+  <text    y="-91" font-size="10" font-weight="bold" letter-spacing="-0.5"
+   >&#169; 2024<tspan x="0" dy="7">cm&#610;&#671;ee</tspan></text>
+ </a>
  <use xlink:href="#rotate" transform="translate(-10,88)"
                            onmousedown="rotate(false)"/>
  <use xlink:href="#rotate" transform="translate( 10,88) scale(-1,1)"/>
