@@ -149,9 +149,9 @@ text::selection { background:none; }
     {'rx':99,'ry':99,'r': 0},
    ], 4) + `
   <use xlink:href="#rotate" transform="translate(-88,-88)"
-                            onmousedown="rotate(false)"/>
+                            onmousedown="rotate(-1)"/>
   <use xlink:href="#rotate" transform="translate( 88,-88) scale(-1,1)"
-                            onmousedown="rotate(true)"/>`;
+                            onmousedown="rotate(1)"/>`;
   }
   function makeSecond() {
    return makePan([
@@ -234,6 +234,21 @@ text::selection { background:none; }
    return '<g font-size="12">\n' + outs.join('') + '\n</g>';
   }
   /// RESPOND TO BUTTONS
+  const elSvg    = document.getElementsByTagName('svg')[0];
+  const viewBoxs = elSvg.getAttribute('viewBox').split(/\s+/);
+  var degScreen  = 0;
+  function rotate(mode) { /// 1:clockwise: -1:antic/w, 0:no change (for tenor)
+   degScreen += mode == 0 ? 0 : mode > 0 ? 90 : -90;
+   // console.log(viewBoxs, degScreen);
+   elSvg.setAttribute('viewBox',
+    (document.getElementById('tenor').style.visibility == 'visible' ?
+     [viewBoxs[1], viewBoxs[1], viewBoxs[3], viewBoxs[3]] :
+     degScreen % 180 == 0 ? /// landscape
+     [viewBoxs[0], viewBoxs[1], viewBoxs[2], viewBoxs[3]] :
+     [viewBoxs[1], viewBoxs[0], viewBoxs[3], viewBoxs[2]]).join(' '));
+   document.getElementById('main').setAttribute('transform',
+                                                'rotate(' + degScreen + ')');
+  }
   function switchInst(idShow) {
    for (let iInst = 0; iInst < instss.length; ++iInst) {
     const id = instss[iInst]['id'];
@@ -242,17 +257,7 @@ text::selection { background:none; }
     document.getElementById('button_' + id).style.fill =
      idShow == id ? 'url(#grad_active)' : '#899';
    }
-  }
-  function rotate(isClockwise) {
-   const elSvg    = document.getElementsByTagName('svg')[0];
-   const elMain   = document.getElementById('main');
-   const viewBoxs = elSvg.getAttribute('viewBox').split(/\s+/);
-   const deg = parseInt(elMain.getAttribute('transform').match(/[-\d]+/)[0]);
-   // console.log(viewBoxs, deg);
-   elSvg.setAttribute('viewBox', [viewBoxs[1], viewBoxs[0],
-                                  viewBoxs[3], viewBoxs[2]].join(' '));
-   elMain.setAttribute('transform', 'rotate(' + (deg + (isClockwise ?
-                                                        90 : -90)) + ')');
+   rotate(0); /// update viewBox in case needed
   }
   /// INITIALISE
   const outss = [`
@@ -262,9 +267,9 @@ text::selection { background:none; }
    >&#169; 2024<tspan x="0" dy="7">cm&#610;&#671;ee</tspan></text>
  </a>
  <use xlink:href="#rotate" transform="translate(-10,88)"
-                           onmousedown="rotate(false)"/>
+                           onmousedown="rotate(-1)"/>
  <use xlink:href="#rotate" transform="translate( 10,88) scale(-1,1)"
-                           onmousedown="rotate(true)"/>`];
+                           onmousedown="rotate(1)"/>`];
   const instss  = [{'id':'tenor'  ,'function':makeTenor  ,'xy':'-146, 92'},
                    {'id':'second' ,'function':makeSecond ,'xy':' -86, 92'},
                    {'id':'guitar' ,'function':makeGuitar ,'xy':'  86, 92'},
@@ -297,7 +302,7 @@ text::selection { background:none; }
   // switchInst('bass');
   // switchInst('kalimba');
   // switchInst('piano');
-  if (window.innerWidth < window.innerHeight) { rotate(true); }
+  if (window.innerWidth < window.innerHeight) { rotate(-1); }
  ]]></script>
 </svg>
 
