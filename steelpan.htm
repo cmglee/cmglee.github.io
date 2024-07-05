@@ -80,7 +80,9 @@ text::selection { background:none; }
    if (isOnTouch) { isTouchDevice = true; }
    /// Avoid triggering on both onmousedown and ontouchstart
    if (isOnTouch || !isTouchDevice) {
-    playNotes([hertz], [Math.sqrt(2 * hertzC4 / hertz)]);
+    const duration = Math.sqrt(hertzC4 / hertz);
+    playNotes([hertz * 3], [duration * 2], 'sine'    );
+    playNotes([hertz    ], [duration    ], 'triangle');
    }
    // document.getElementById('debug').innerHTML =
    //  hertz.toFixed(0) + ',' + (new Date()).getTime() % 1e3;
