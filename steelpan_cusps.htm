@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <title>CUSPS steel-pan practice tool by CMG Lee</title>
+  <script language="Javascript"><!-- make frames if not in one
+if (window == window.top) {
+ document.write('<html><head><title>' + document.title + '</title></head>'
+  + '<frameset rows="*,52%" frameborder="1" border="4" framespacing="4">'
+  + ' <frame name="note" src="' + window.location + '?">'
+  + ' <frame name="pans" src="steelpan.htm">'
+  + '</frameset></html>');
+}
+// --></script>
+  <style type="text/css">
+html, body, textarea { margin:0; height:100%; width:100%;
+                       color:#ffffff; background:#000000; }
+textarea { position:absolute; top:0; border:none; font:300%/0.9 monospace; }
+input    { text-align:right; font:200% Tahoma; }
+td       { width:1px; }
+#reading { color:#cccccc; background:#000000; border:none; }
+#file    { font:80% Tahoma; }
+  </style>
+ </head>
+ <body style="overflow:hidden;">
+  <form style="height:100%;" onsubmit="return false;">
+   <table style="width:100%; height:100%;">
+    <tr style="height:1px;"><td id="pieces" colspan="99"></td></tr>
+    <tr><td colspan="99" style="position:relative;"><textarea id="sheet"></textarea></td></tr>
+    <tr style="height:1px;">
+     <td><input type="button" value="&nbsp;&laquo;&nbsp;" onclick="seek(-5);" /></td>
+     <td><input type="button" value="&nbsp;&raquo;&nbsp;" onclick="seek( 5);" /></td>
+     <!--
+     <td><input type="button" value="1&times;"            onclick="rate(       100,false);" /></td>
+     -->
+     <td nowrap="nowrap"><input id="reading" size="2"    onchange="rate(this.value,false);" />%</td>
+     <td><input type="button" value="&nbsp;&minus;&nbsp;" onclick="rate(       -10, true);" /></td>
+     <td><input type="button" value="&nbsp;+&nbsp;"       onclick="rate(        10, true);" /></td>
+     <td style="width:100%;">
+      <audio id="audio" controls style="width:100%;">
+       <source src="pirates.mp3" type="audio/mpeg" />
+       This browser does not support the audio tag
+      </audio>
+     </td>
+     <!--
+     -->
+     <td><input id="file" type="file" accept="audio/*" /></td>
+    </tr>
+   </table>
+   <script language="Javascript"><!--
+/// http://stackoverflow.com/a/18083202
+file.onchange = function() {
+ elAudio.src = URL.createObjectURL(this.files[0]);
+ elAudio.load();
+};
+/// Adjust playback rate
+function seek(delta) { elAudio.currentTime += delta; }
+function rate(rateInput, isRelative) {
+ rateCurrent          = (isRelative ? rateCurrent : 0) + parseInt(rateInput);
+ elReading.value      = rateCurrent;
+ elAudio.playbackRate = rateCurrent / 100;
+ console.log(rateInput, rateCurrent, audio.playbackRate);
+}
+var   rateCurrent = 100;
+const elAudio     = document.getElementById('audio');
+const elReading   = document.getElementById('reading');
+audio.focus();
+rate(100, false);
+/// Pieces
+piecess = [
+ { 'name':`Under the Sea`, 'file':`undersea.mp3`, 'sheet':`
+{ { F# A D' F#' F#' D' E'/C#' G'/E' F#'/D' D'/A
+    D F# A D' D' D' C#'/A E'/A D'/F# } x2
+  { D' D' D' D' C#' E' D' A~  F# A  A   F# E  A  F#~ } x2
+  { B  D' D' B  A  D' A  D'~  E' E' E' D' F#' E' D'~ } x2
+  F#'/A F#/D'
+  F#' E' D' B/G   B/G  B/G   B/G  B/G   A/F#  A/F#
+  F#' E' D' E'/A  E'/A E'/A  E'/A E'/A  D'/F# D'/F#
+  F#' E' D' B A    F#' E' D' B A   F#' E' D' F#'/D'~
+  F#' E' D' B D' D' B E'~ E' D' E' F#' F#' E' E' D'~
+  F#' E' D' B A    F#' E' D' B A   F#' E' D'          }x2
+D F# A D' D' D' C#'/A E'/A F#/D'
+{ D' C#'/A C#'/A C#'/A C#'/A  B A/F# A/F# A/F# A/F#
+  D' C#'/A C#'/A C#'/A C#'/A  B A/F# A/F# A/F# A/F#
+  A  B/G B/G B/G B/D'         B A/F# A/F# A/F# D'/A
+  D' C#' C#' D' E' C#' D'
+{ F#' E' D' B/G   B/G  B/G   B/G  B/G   A/F#  A/F#
+  F#' E' D' E'/A  E'/A E'/A  E'/A E'/A  D'/F# D'/F#
+  F#' E' D' B A    F#' E' D' B A   F#' E' D' F#'/D'~
+  F#' E' D' B D' D' B E'~ E' D' E' F#' F#' E' E' D'~
+  F#' E' D' B A    F#' E' D' B A   F#' E'  D' D'/F#~ }x2
+F#' E' D' B A    F#' E' D' B A   F#' E'  D' D'/F#~
+F#' E' D' B A    F#' E' D' B A   F#' E'  D'
+F# A D' F#' F#' D' E'/C#' G'/E' F#'/D' D'/A
+D F# A D' D' D' C#'/A E'/A F#/D' F#'/D"
+`.trim() },
+ { 'name':`Pirates`, 'file':`pirates.mp3`, 'sheet':`
+{ D F G G / G A Bb Bb / Bb C' A A / G F F G
+  D F G G / G A Bb Bb / Bb C' A A / G F G
+  D F G G / G Bb C' C' / C' D' Eb' Eb' / D' C' D' G
+  G A Bb Bb C' D' G / G Bb A A Bb G A
+
+  D F G G / G A Bb Bb / Bb C' A A / G F F G
+  D F G G / G A Bb Bb / Bb C' A A / G F G
+  D F G G / G Bb C' C' / C' D' Eb' Eb' / D' C' D' G
+  G A Bb Bb C' D' G / G Bb A A G F#
+  G G A Bb Bb C' D' / Bb G D
+  Eb' / Bb G Eb  / D G Bb A
+  D' D' D' Eb' D' / C' C' C' C' D'
+  D' D' D' Eb' D' / C' Bb A G
+
+  G A Bb / C' D' C' Bb A Bb C' D' C'
+  Bb C' D' / C' Bb A Bb A G / A F G
+  G A Bb / A Bb C' Bb C' D' C' Bb G
+  G A Bb C' D' Eb' G C' / Bb / C' A / G / A F#
+  D' / Eb' / D' D' D' D' C' / C' / Bb / A Bb A G
+  G A Bb D' / G A Bb Eb' / G A Bb D' D' F' D' C'
+  C' / Bb / A Bb A G } x2  G D Bb G
+`.trim() },
+ { 'name':`Someone in the Crowd`, 'file':`someone.mp3`, 'sheet':`
+{ E' E' D' E' D' E' F#', E' E' F#' E' D' B
+  E' E' D' E' D' E' F#', E' E' F#' E' D' B
+  A' A' G' A' G' A' B', A' A' B' A' G' E' D' D'
+  D' D' E' G' B' } x2
+E F# G A B D' B A G B G F# E
+E E F# G A B D' B A G
+E' D' C' B A G F# A B D' B D' E'
+B E' D' C' B A G F# B
+E F# G A B D' E'
+
+B A G B B B, G B D' C' C' C'
+G C' E' D' D' D' D' B D' E'
+B A G B B B, G B D' C' C' C'
+G C' E' D' D' D' E' E' E' F#'
+D' D' D' B D'
+{ E E E F# G, F# F# F# G A
+  B B B D' B, G G G B G } x2
+{ E F# G F# G A, F# G A G A B } x2
+F# G A G A B, F# G A G A B
+{ A B C' B C' D', D' E' D' B D' B} x2
+D' E' D' B D' B,  D' E' D' B D' B
+                  A A A A A A   B
+E F# G A B D' B A G B G F# E
+E E F# G A B D' B A G
+E' D' C' B A G F# A B D' B D' E'
+E' D' C' B A G F# A
+E' D' C' B A G F# A, F#' E' D' C' B
+B E' D' C' B A B C' F#' G'
+`.trim() },
+//  { 'name':`Sleigh Ride`, 'file':`sleigh.mp3`, 'sheet':`
+// `.trim() },
+];
+const elPieces = document.getElementById('pieces');
+const elSheet  = document.getElementById('sheet');
+outTrs         = [];
+for (let i = 0; i < piecess.length; ++i) {
+ outTrs.push(`
+<input type="button" value="${piecess[i].name}" onclick="load(${i})" />`);
+}
+document.getElementById('pieces').innerHTML = outTrs.join('');
+function load(iPiece) {
+ const pieces  = piecess[iPiece];
+ elSheet.value = pieces.sheet;
+ elAudio.src   = pieces.file;
+ elAudio.load();
+}
+load(0);
+// --></script>
+  </form>
+ </body>
+</html>
