@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html style="height:100%;">
+<html>
  <head>
   <title>CUSPS steel-pan simulator by CMG Lee</title>
   <script language="Javascript"><!-- make frames if not in one
@@ -11,11 +11,20 @@ if (window == window.top) {
   + '</frameset></html>');
 }
 // --></script>
+  <style type="text/css">
+html, body, textarea, #reading { margin:0; height:100%;
+                                 color:#ffffff; background:#000000; }
+textarea                       { width:99.5%; height:90%; border:none; }
+textarea, input                { font:300%/0.9 monospace; }
+input                          { text-align:right; }
+td                             { width:1px; }
+#reading                       { border:none; }
+#file                          { font:80% Tahoma; }
+  </style>
  </head>
- <body style="margin:0; height:100%;" onLoad="document.forms[0].note.focus();">
-  <form style="height:99%;" onSubmit="location.href=note.value; return false;">
-   <textarea name="note" style="width:99.5%; height:99%;
- font:300%/0.9 monospace; color:#ffffff; background:#000000; border:none;"
+ <body>
+  <form style="height:99%;" onsubmit="return false;">
+   <textarea name="note"
 >{ D F G G / G A Bb Bb / Bb C' A A / G F F G
   D F G G / G A Bb Bb / Bb C' A A / G F G
   D F G G / G Bb C' C' / C' D' Eb' Eb' / D' C' D' G
@@ -37,6 +46,39 @@ if (window == window.top) {
   D' / Eb' / D' D' D' D' C' / C' / Bb / A Bb A G
   G A Bb D' / G A Bb Eb' / G A Bb D' D' F' D' C'
   C' / Bb / A Bb A G } x2  G D Bb G...</textarea>
+   <table style="width:100%;"><tr>
+    <!--
+    <td><input type="button" value="1&times;"            onclick="rate(       100,false);" /></td>
+    -->
+    <td><input type="button" value="&nbsp;&minus;&nbsp;" onclick="rate(        -5, true);" /></td>
+    <td><input type="button" value="&nbsp;+&nbsp;"       onclick="rate(         5, true);" /></td>
+    <td nowrap="nowrap"><input id="reading" size="3"    onchange="rate(this.value,false);" />%</td>
+    <td><input type="button" value="&nbsp;&laquo;&nbsp;" onclick="seek(-5);" /></td>
+    <td><input type="button" value="&nbsp;&raquo;&nbsp;" onclick="seek( 5);" /></td>
+    <td style="width:100%;">
+     <audio id="audio" controls style="width:100%;">
+      <source src="pirates.mp3" type="audio/mpeg" />
+      This browser does not support the audio tag
+     </audio>
+    </td>
+    <td><input id="file" type="file" accept="audio/*" /></td>
+   </tr></table>
+   <script language="Javascript"><!-- adjust playback rate
+/// http://stackoverflow.com/a/18083202
+file.onchange = function() { audio.src = URL.createObjectURL(this.files[0]); };
+function seek(delta) { audio.currentTime += delta; }
+function rate(rateInput, isRelative) {
+ rateCurrent        = (isRelative ? rateCurrent : 0) + parseInt(rateInput);
+ reading.value      = rateCurrent;
+ audio.playbackRate = rateCurrent / 100;
+ console.log(rateInput, rateCurrent, audio.playbackRate);
+}
+var   rateCurrent = 100;
+const audio       = document.getElementById('audio');
+const reading     = document.getElementById('reading');
+audio.focus();
+rate(100, false);
+// --></script>
   </form>
  </body>
 </html>
