@@ -197,16 +197,14 @@ text::selection { background:none; }
   function makeKalimba() {
    const outs   = [];
    const wNote  = 19.5;
-   const shades = [1,0,1,1,0,1,1,0,1,0,1,1,0,1,1,0,1];
-   const notes  = ['D5','B4','G4','E4','C4','A3','F3','D3','C3',
-                   'E3','G3','B3','D4','F4','A4','C5','E5'];
+   const notes  = ['G5','E4','C4','A4','F4','D3','B3','G3','F3',
+                   'A3','C3','E3','G4','B4','D4','F5','A5'];
    for (let iNote = 0; iNote < notes.length; ++iNote) {
     if (notes[iNote].length > 0) {
      const hNote = (15 - Math.abs(iNote - 7.75)) * 10;
      outs.push(makePianoNote(notes[iNote], 3,
-      (iNote - (notes.length - 1) / 2.0) * (wNote + 1),
-      hNote - 90,
-      wNote, hNote, shades[iNote] == 1 ? 'white' : 'grey'));
+      (iNote - (notes.length - 1) / 2.0) * (wNote + 1), hNote - 90,
+      wNote, hNote, Math.abs(iNote - 8) % 3 == 0 ? 'grey' : 'white'));
     }
    }
    return outs.join('');
