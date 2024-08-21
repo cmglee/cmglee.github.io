@@ -15,10 +15,11 @@ if (window == window.top) {
 html, body, textarea { margin:0; height:100%; width:100%;
                        color:#ffffff; background:#000000; }
 textarea { position:absolute; top:0; border:none; font:300%/0.9 monospace; }
-input    { text-align:right; font:300% Tahoma; }
+input    { text-align:right; font:300% Tahoma; background:linear-gradient(to top,#999999,#ffffff); }
 td       { width:1px; }
 #reading { color:#cccccc; background:#000000; border:none; }
 #file    { font:80% Tahoma; }
+.piece   { font-size:250%; }
   </style>
  </head>
  <body style="overflow:hidden;">
@@ -27,8 +28,8 @@ td       { width:1px; }
     <tr style="height:1px;"><td id="pieces" colspan="99"></td></tr>
     <tr><td colspan="99" style="position:relative;"><textarea id="sheet"></textarea></td></tr>
     <tr style="height:1px;">
-     <td><input type="button" value="&nbsp;&laquo;&nbsp;" onclick="seek(-5);" /></td>
-     <td><input type="button" value="&nbsp;&raquo;&nbsp;" onclick="seek( 5);" /></td>
+     <td><input type="button" value="&nbsp; &laquo; &nbsp;" onclick="seek(-5);" /></td>
+     <td><input type="button" value="&nbsp; &raquo; &nbsp;" onclick="seek( 5);" /></td>
      <!--
      <td><input type="button" value="1&times;"            onclick="rate(       100,false);" /></td>
      -->
@@ -167,8 +168,7 @@ const elPieces = document.getElementById('pieces');
 const elSheet  = document.getElementById('sheet');
 outTrs         = [];
 for (let i = 0; i < piecess.length; ++i) {
- outTrs.push(`
-<input type="button" value="${piecess[i].name}" onclick="load(${i})" />`);
+ outTrs.push(`<input class="piece" type="button" value="${piecess[i].name.replace(/ /g,'&thinsp;')}" onclick="load(${i})" />`);
 }
 document.getElementById('pieces').innerHTML = outTrs.join('');
 function load(iPiece) {
