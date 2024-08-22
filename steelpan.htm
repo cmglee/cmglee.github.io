@@ -196,7 +196,7 @@ text::selection { background:none; }
   }
   function makeKalimba() {
    const outs   = [];
-   const wNote  = 16.5;
+   const wNote  = 16.6;
    const notes  = ['D6','B5','G5','E5','C5','A4','F4','D4','B3','G3','F3',
                    'A3','C4','E4','G4','B4','D5','F5','A5','C6','E6'];
    for (let iNote = 0; iNote < notes.length; ++iNote) {
@@ -296,11 +296,11 @@ text::selection { background:none; }
    const insts = instss[iData];
    document.getElementById(insts['id']).innerHTML = insts['function']();
   }
-  // switchInst('tenor');
+  switchInst('tenor');
   // switchInst('second');
   // switchInst('guitar');
   // switchInst('bass');
-  switchInst('kalimba');
+  // switchInst('kalimba');
   // switchInst('piano');
   if (window.innerWidth < window.innerHeight) { rotate(-1); }
  ]]></script>
